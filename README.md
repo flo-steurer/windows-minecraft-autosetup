@@ -18,11 +18,13 @@ The intended scale is small batch deployment: roughly tens of laptops.
    - Copy `%APPDATA%\.minecraft\assets` to `minecraft_usb_automation\payload\forge-template\assets` if you want first launch to work with minimal downloads.
    - Copy mod `.jar` files to `minecraft_usb_automation\payload\mods`.
    - Put a tested offline Minecraft Launcher installer in `minecraft_usb_automation\payload\installers` when possible.
+   - Put a tested Roblox Studio installer in `minecraft_usb_automation\payload\installers\roblox-studio` when possible.
 
 3. Edit `minecraft_usb_automation\payload\config.json`.
    - Change account names under `windows`.
    - Change Forge/profile settings under `minecraft`.
    - Change the `mods` list for a different modpack.
+   - Change or disable Roblox Studio under `extraApps`.
    - Optionally fill each mod's `sha256`; generate it on Windows with `Get-FileHash <file> -Algorithm SHA256`.
    - Increment `setupVersion` when you want already-provisioned user profiles to re-run setup.
 
@@ -59,6 +61,7 @@ Do not commit:
 
 - `payload\local-secrets.psd1`
 - Minecraft Launcher installers
+- Roblox Studio installers
 - Mod `.jar` files
 - copied Forge libraries, versions, or assets
 - setup logs

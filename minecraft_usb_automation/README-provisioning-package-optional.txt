@@ -16,7 +16,8 @@ Instead, use the provisioning package to run:
 
 OOBE-Apply.ps1 reads payload\config.json and payload\local-secrets.psd1, creates
 the configured local admin and player accounts, then runs the machine phase of
-Install-Minecraft189.ps1.
+Install-Minecraft189.ps1. The machine phase installs Minecraft Launcher and any
+enabled extra apps, such as Roblox Studio.
 
 Suggested WCD package
 ---------------------

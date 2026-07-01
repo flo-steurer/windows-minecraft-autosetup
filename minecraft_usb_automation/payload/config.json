@@ -18,6 +18,36 @@
     "preferOfflineInstaller": true,
     "wingetId": "Mojang.MinecraftLauncher"
   },
+  "extraApps": [
+    {
+      "name": "Roblox Studio",
+      "enabled": true,
+      "preferOfflineInstaller": true,
+      "installerFolder": "payload\\installers\\roblox-studio",
+      "installerPatterns": [
+        "*RobloxStudio*.exe",
+        "*Roblox*Studio*.exe"
+      ],
+      "silentArgs": [
+        [
+          "-install"
+        ],
+        [
+          "/quiet",
+          "/norestart"
+        ],
+        [
+          "/silent",
+          "/norestart"
+        ],
+        [
+          "/S"
+        ],
+        []
+      ],
+      "wingetId": "Roblox.RobloxStudio"
+    }
+  ],
   "mods": [
     {
       "file": "ComputerCraft1.79.jar",

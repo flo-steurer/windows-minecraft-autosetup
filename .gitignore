@@ -3,11 +3,11 @@ logs/
 minecraft_usb_automation/logs/
 minecraft_usb_automation/payload/local-secrets.psd1
 minecraft_usb_automation/payload/mods/*.jar
-minecraft_usb_automation/payload/installers/*.exe
-minecraft_usb_automation/payload/installers/*.msi
-minecraft_usb_automation/payload/installers/*.appx
-minecraft_usb_automation/payload/installers/*.msix
-minecraft_usb_automation/payload/installers/*.msixbundle
+minecraft_usb_automation/payload/installers/**/*.exe
+minecraft_usb_automation/payload/installers/**/*.msi
+minecraft_usb_automation/payload/installers/**/*.appx
+minecraft_usb_automation/payload/installers/**/*.msix
+minecraft_usb_automation/payload/installers/**/*.msixbundle
 minecraft_usb_automation/payload/forge-template/assets/**
 minecraft_usb_automation/payload/forge-template/libraries/**
 minecraft_usb_automation/payload/forge-template/versions/**

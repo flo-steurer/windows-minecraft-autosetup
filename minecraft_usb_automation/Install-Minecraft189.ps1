@@ -265,6 +265,62 @@ function Invoke-LocalMinecraftInstaller {
     throw "Found $($exe.Name), but none of the common silent install attempts worked. Test the installer flags manually."
 }
 
+function Invoke-LocalConfiguredInstaller {
+    param(
+        [string]$InstallerDir,
+        [string]$Name,
+        [object[]]$Patterns,
+        [object[]]$SilentArgSets
+    )
+
+    if (-not (Test-Path -LiteralPath $InstallerDir)) {
+        return $false
+    }
+
+    $patternList = @($Patterns)
+    if ($patternList.Count -eq 0) {
+        $patternList = @('*.msi','*.exe')
+    }
+
+    $installer = $null
+    foreach ($pattern in $patternList) {
+        $installer = Get-ChildItem -LiteralPath $InstallerDir -Filter ([string]$pattern) -File -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($installer) { break }
+    }
+
+    if (-not $installer) {
+        return $false
+    }
+
+    if ($installer.Extension -ieq '.msi') {
+        Invoke-External -FilePath 'msiexec.exe' -ArgumentList @('/i', $installer.FullName, '/qn', '/norestart') -AllowedExitCodes @(0,3010)
+        return $true
+    }
+
+    $argSets = @($SilentArgSets)
+    if ($argSets.Count -eq 0) {
+        $argSets = @(
+            @('-install'),
+            @('/quiet','/norestart'),
+            @('/silent','/norestart'),
+            @('/S'),
+            @()
+        )
+    }
+
+    foreach ($argSet in $argSets) {
+        $args = @($argSet)
+        try {
+            Invoke-External -FilePath $installer.FullName -ArgumentList $args -AllowedExitCodes @(0,3010)
+            return $true
+        } catch {
+            Write-Warning "$Name installer attempt failed with args [$($args -join ' ')]: $($_.Exception.Message)"
+        }
+    }
+
+    throw "Found $($installer.Name), but none of the configured silent install attempts worked for $Name."
+}
+
 function Install-MinecraftLauncher {
     param(
         [string]$Root,
@@ -311,6 +367,70 @@ function Install-MinecraftLauncher {
     }
 
     throw "Minecraft Launcher was not installed. Add a tested offline installer under payload\installers or make WinGet available."
+}
+
+function Install-ExtraApps {
+    param(
+        [string]$Root,
+        [object]$Config
+    )
+
+    $apps = Get-PropertyValue -Object $Config -Name 'extraApps' -Default @()
+    foreach ($app in @($apps)) {
+        $enabled = Test-ConfigFlag -Object $app -Name 'enabled' -Default $false
+        if (-not $enabled) { continue }
+
+        $name = [string](Get-PropertyValue -Object $app -Name 'name' -Default 'Extra app')
+        Write-Step "Installing $name"
+
+        $installerFolder = [string](Get-PropertyValue -Object $app -Name 'installerFolder' -Default '')
+        $installerDir = if ([string]::IsNullOrWhiteSpace($installerFolder)) {
+            Join-Path $Root 'payload\installers'
+        } else {
+            Join-Path $Root $installerFolder
+        }
+
+        $patterns = @((Get-PropertyValue -Object $app -Name 'installerPatterns' -Default @()))
+        $silentArgSets = @((Get-PropertyValue -Object $app -Name 'silentArgs' -Default @()))
+        $preferOffline = Test-ConfigFlag -Object $app -Name 'preferOfflineInstaller' -Default $true
+        $wingetId = [string](Get-PropertyValue -Object $app -Name 'wingetId' -Default '')
+
+        if ($preferOffline) {
+            if (Invoke-LocalConfiguredInstaller -InstallerDir $installerDir -Name $name -Patterns $patterns -SilentArgSets $silentArgSets) {
+                continue
+            }
+            Write-Warning "No local installer was found for $name in $installerDir."
+        }
+
+        if (-not [string]::IsNullOrWhiteSpace($wingetId)) {
+            $winget = Get-Command winget.exe -ErrorAction SilentlyContinue
+            if ($winget) {
+                try {
+                    Invoke-External -FilePath $winget.Source -ArgumentList @(
+                        'install',
+                        '--id', $wingetId,
+                        '--exact',
+                        '--silent',
+                        '--accept-package-agreements',
+                        '--accept-source-agreements'
+                    ) -AllowedExitCodes @(0)
+                    continue
+                } catch {
+                    Write-Warning "WinGet install failed for $name`: $($_.Exception.Message)"
+                }
+            } else {
+                Write-Warning "winget.exe was not found while installing $name."
+            }
+        }
+
+        if (-not $preferOffline) {
+            if (Invoke-LocalConfiguredInstaller -InstallerDir $installerDir -Name $name -Patterns $patterns -SilentArgSets $silentArgSets) {
+                continue
+            }
+        }
+
+        throw "$name was not installed. Add a tested offline installer or verify its wingetId in payload\config.json."
+    }
 }
 
 function Register-UserPhaseAtLogon {
@@ -390,6 +510,7 @@ function Install-MachinePhase {
     }
 
     Install-MinecraftLauncher -Root $installedRoot -Config $Config
+    Install-ExtraApps -Root $installedRoot -Config $Config
     Register-UserPhaseAtLogon -InstalledRoot $installedRoot -Config $Config
 
     Write-Host 'Machine phase complete.'

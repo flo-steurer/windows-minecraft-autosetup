@@ -40,6 +40,8 @@ USB:\
       <mod jars listed in config.json>
     installers\
       optional tested Minecraft Launcher offline installer
+      roblox-studio\
+        optional tested Roblox Studio offline installer
     forge-template\
       versions\
         <Forge version folder from golden machine>
@@ -72,6 +74,7 @@ Edit payload\config.json for:
 - Forge version id
 - launcher profile name
 - Java memory args
+- extra apps such as Roblox Studio
 - mod file list and optional SHA256 hashes
 
 Generate a mod hash on Windows with:
@@ -83,7 +86,8 @@ Increment setupVersion when you change the modpack and want existing user profil
 Notes
 -----
 - The script prefers a local Minecraft Launcher installer from payload\installers.
-- If no local installer is found, it falls back to WinGet.
+- Roblox Studio is configured as an extra machine-phase app in payload\config.json.
+- If no local app installer is found, the script falls back to the configured WinGet package id.
 - It copies the package to C:\ProgramData\MinecraftModpackSetup so the USB is not needed later.
 - Per-user setup runs through Windows Active Setup when the configured player logs in.
 - Logs are written to C:\ProgramData\MinecraftModpackSetup\Logs or the USB logs folder.
