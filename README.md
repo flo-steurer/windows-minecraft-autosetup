@@ -2,7 +2,7 @@
 
 Reusable USB kit for resetting Windows laptops and preparing a local Minecraft Java/Forge modpack environment.
 
-The intended scale is small batch deployment: roughly tens of laptops. It is designed to be public-repo friendly: configuration is tracked, but passwords, Minecraft installers, Forge libraries, assets, and mod jars are ignored.
+The intended scale is small batch deployment: roughly tens of laptops.
 
 ## Recommended workflow
 
