@@ -332,8 +332,9 @@ function Get-InstalledProgramNames {
     foreach ($path in $paths) {
         $items = Get-ItemProperty -Path $path -ErrorAction SilentlyContinue
         foreach ($item in $items) {
-            if (-not [string]::IsNullOrWhiteSpace([string]$item.DisplayName)) {
-                $names += [string]$item.DisplayName
+            $displayName = [string](Get-PropertyValue -Object $item -Name 'DisplayName' -Default '')
+            if (-not [string]::IsNullOrWhiteSpace($displayName)) {
+                $names += $displayName
             }
         }
     }

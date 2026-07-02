@@ -281,7 +281,8 @@ function Get-InstalledProgramEntries {
     foreach ($path in $paths) {
         $items = Get-ItemProperty -Path $path -ErrorAction SilentlyContinue
         foreach ($item in $items) {
-            if (-not [string]::IsNullOrWhiteSpace([string]$item.DisplayName)) {
+            $displayName = [string](Get-PropertyValue -Object $item -Name 'DisplayName' -Default '')
+            if (-not [string]::IsNullOrWhiteSpace($displayName)) {
                 $entries += $item
             }
         }
@@ -338,11 +339,11 @@ function Invoke-ConfiguredUninstalls {
     Write-Step 'Uninstalling configured apps'
     $entries = Get-InstalledProgramEntries
     foreach ($entry in $entries) {
-        $displayName = [string]$entry.DisplayName
+        $displayName = [string](Get-PropertyValue -Object $entry -Name 'DisplayName' -Default '')
         foreach ($pattern in $patterns) {
             if ($displayName -like [string]$pattern) {
-                $quietCommand = [string]$entry.QuietUninstallString
-                $normalCommand = [string]$entry.UninstallString
+                $quietCommand = [string](Get-PropertyValue -Object $entry -Name 'QuietUninstallString' -Default '')
+                $normalCommand = [string](Get-PropertyValue -Object $entry -Name 'UninstallString' -Default '')
                 $command = if (-not [string]::IsNullOrWhiteSpace($quietCommand)) { $quietCommand } else { $normalCommand }
                 Invoke-UninstallCommand -DisplayName $displayName -Command $command -AllowNonQuiet $allowNonQuiet
                 break

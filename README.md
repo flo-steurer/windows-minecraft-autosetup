@@ -133,6 +133,8 @@ Those paths are ignored in `.gitignore`.
 - `minecraft_usb_automation\Run-Reprovision-Existing.cmd`: fast no-reset path for existing Windows installs.
 - `minecraft_usb_automation\Run-Rebuild-Existing.cmd`: alias for the no-reset rebuild path.
 - `minecraft_usb_automation\Reprovision-Existing-Windows.ps1`: script behind the no-reset path.
+- `minecraft_usb_automation\Run-Forge-ModpackOnly.cmd`: current-user Forge/mod copy only; does not install Launcher, Java, Roblox, or accounts.
+- `minecraft_usb_automation\Install-Forge-ModpackOnly.ps1`: script behind the Forge/mod-only path.
 - `minecraft_usb_automation\Install-Minecraft189.ps1`: machine and per-user Minecraft setup.
 - `minecraft_usb_automation\payload\config.json`: reusable modpack/account configuration.
 - `minecraft_usb_automation\Run-Setup.cmd`: manual fallback after Windows first-run setup.

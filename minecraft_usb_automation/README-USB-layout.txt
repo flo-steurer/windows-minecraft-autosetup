@@ -58,10 +58,12 @@ USB:\
   Run-Setup.cmd
   Run-Reprovision-Existing.cmd
   Run-Rebuild-Existing.cmd
+  Run-Forge-ModpackOnly.cmd
   Start-Reset-Helper.cmd
   PreReset-Check-And-Launch.ps1
   OOBE-Apply.ps1
   Reprovision-Existing-Windows.ps1
+  Install-Forge-ModpackOnly.ps1
   Install-Minecraft189.ps1
   README-USB-layout.txt
   README-provisioning-package-optional.txt
@@ -120,6 +122,8 @@ Increment setupVersion when you change the modpack and want existing user profil
 
 Notes
 -----
+- Run-Forge-ModpackOnly.cmd only copies Forge/modpack files for the current user.
+  It is useful when Minecraft Launcher and Java are already installed.
 - The script prefers a local Minecraft Launcher installer from payload\installers.
 - Roblox Studio is configured as an extra machine-phase app in payload\config.json.
 - If no local app installer is found, the script falls back to the configured WinGet package id.
