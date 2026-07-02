@@ -1,7 +1,37 @@
 Minecraft/Forge USB automation kit
 ==================================
 
-Use this after Windows Reset, ideally through OOBE provisioning.
+Use this either after Windows Reset through OOBE provisioning, or on an existing
+Windows install through the fast no-reset path.
+
+Fast no-reset workflow
+----------------------
+Use this when Reset this PC is taking too long.
+
+1. Log into an existing administrator account on the laptop.
+2. Insert the USB stick.
+3. Right-click Run-Reprovision-Existing.cmd and choose "Run as administrator".
+4. Sign out.
+5. Log in once as the configured player account.
+6. Sign into Minecraft Launcher with a licensed Minecraft account and choose the configured Forge profile.
+
+For the cleanest result, configure a player account name that does not already
+exist on the laptop. A fresh Windows account gives you a fresh user profile
+without waiting for a full OS reset.
+
+This path also runs conservative disk cleanup: temp folders, recycle bin,
+Windows Update download cache, and Delivery Optimization cache. It does not
+delete documents, downloads, old profiles, or installed apps.
+
+Aggressive cleanup can be enabled in payload\config.json, but it requires:
+
+  "destructiveCleanup": {
+    "enabled": true,
+    "confirmation": "DELETE_USER_DATA"
+  }
+
+Use explicit uninstall.displayNamePatterns for unwanted apps. Do not attempt a
+generic uninstall of every non-Windows program on mixed hardware.
 
 Recommended OOBE workflow
 -------------------------
@@ -26,9 +56,12 @@ USB folder layout
 -----------------
 USB:\
   Run-Setup.cmd
+  Run-Reprovision-Existing.cmd
+  Run-Rebuild-Existing.cmd
   Start-Reset-Helper.cmd
   PreReset-Check-And-Launch.ps1
   OOBE-Apply.ps1
+  Reprovision-Existing-Windows.ps1
   Install-Minecraft189.ps1
   README-USB-layout.txt
   README-provisioning-package-optional.txt
@@ -75,6 +108,8 @@ Edit payload\config.json for:
 - launcher profile name
 - Java memory args
 - extra apps such as Roblox Studio
+- conservative cleanup settings
+- optional destructive cleanup and configured app uninstall settings
 - mod file list and optional SHA256 hashes
 
 Generate a mod hash on Windows with:

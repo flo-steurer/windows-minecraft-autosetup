@@ -33,17 +33,76 @@ The intended scale is small batch deployment: roughly tens of laptops.
    - Fill in `AdminPassword`.
    - Leave `PlayerPassword` blank only if you intentionally want the player account to have no password.
 
-5. Reset each laptop.
-   - Settings > System > Recovery > Reset this PC > Remove everything.
-   - Local reinstall is usually enough if Windows itself is healthy.
+5. Choose a deployment path.
+   - Fast path: keep Windows and run `minecraft_usb_automation\Run-Reprovision-Existing.cmd` as administrator.
+   - Cleanest path: reset each laptop with Settings > System > Recovery > Reset this PC > Remove everything.
 
-6. During OOBE, apply a provisioning package that runs:
+6. For the reset path, during OOBE, apply a provisioning package that runs:
 
    ```powershell
    powershell.exe -NoProfile -ExecutionPolicy Bypass -File "<path-to-usb>\OOBE-Apply.ps1"
    ```
 
-7. Log in once as the player account.
+7. For the no-reset path, sign out and log in once as the configured player account.
+   - The per-user Minecraft setup runs via Windows Active Setup.
+   - Start Minecraft Launcher, sign in with a licensed account, and select the configured Forge profile.
+
+## Fast no-reset path
+
+Use this when Windows Reset is too slow.
+
+The fastest reliable approach is not to deeply clean every old Windows install. Instead:
+
+1. Keep the existing Windows installation.
+2. Run conservative disk cleanup from an existing admin account.
+3. Create or update the configured local admin account.
+4. Create a fresh standard player account.
+5. Install Minecraft Launcher, Roblox Studio, Forge files, and mods.
+6. Only let children use the standard player account.
+
+For the cleanest result, set `windows.playerUserName` in `payload\config.json` to an account name that does not already exist on the laptop, for example `Player2026`. A new Windows account gets a fresh profile, so old browser files, old Minecraft config, old downloads, and old app data from previous users do not carry over into the child account.
+
+Run this on each laptop from an existing admin account:
+
+```text
+minecraft_usb_automation\Run-Reprovision-Existing.cmd
+```
+
+Then sign out and log in as the configured player account.
+
+The no-reset script cleans temp folders, recycle bin, Windows Update download cache, and Delivery Optimization cache. It does not delete documents, downloads, old user profiles, or installed apps. You can change cleanup behavior under `cleanup` in `payload\config.json`; keep `runComponentCleanup` disabled unless you can afford a slower DISM cleanup pass.
+
+### Aggressive no-reset mode
+
+The script can also be configured to behave more like a rebuild, but it is intentionally opt-in.
+
+In `payload\config.json`:
+
+- `destructiveCleanup.enabled`: set to `true` only when you really want destructive cleanup.
+- `destructiveCleanup.confirmation`: must be exactly `DELETE_USER_DATA`.
+- `destructiveCleanup.deleteExistingPlayerProfile`: deletes the configured player profile so the next login recreates default Windows settings for that player.
+- `destructiveCleanup.deleteKnownUserDataFolders`: deletes configured folders such as Desktop, Documents, Downloads, Pictures, Videos, and Music from non-excluded profiles.
+- `uninstall.enabled`: removes only programs matching `uninstall.displayNamePatterns`; it does not blindly remove every non-Windows app.
+
+Do not try to uninstall "everything extra" generically. On mixed laptops, that can remove drivers, OEM utilities, school management tools, Office/licensing pieces, or GPU/Wi-Fi support. Use the explicit uninstall patterns for known unwanted apps.
+
+Java 8 is configured as an extra app. Put a tested Java 8 installer in `payload\installers\java8`, or verify the configured WinGet package id on one test laptop before relying on network installation.
+
+## Reset path
+
+If you still want the cleanest OS state:
+
+1. Reset each laptop.
+   - Settings > System > Recovery > Reset this PC > Remove everything.
+   - Local reinstall is usually enough if Windows itself is healthy.
+
+2. During OOBE, apply a provisioning package that runs:
+
+   ```powershell
+   powershell.exe -NoProfile -ExecutionPolicy Bypass -File "<path-to-usb>\OOBE-Apply.ps1"
+   ```
+
+3. Log in once as the player account.
    - The per-user Minecraft setup runs via Windows Active Setup.
    - Start Minecraft Launcher, sign in with a licensed account, and select the configured Forge profile.
 
@@ -71,6 +130,9 @@ Those paths are ignored in `.gitignore`.
 ## Main files
 
 - `minecraft_usb_automation\OOBE-Apply.ps1`: OOBE/provisioning entry point. Creates accounts and runs machine setup.
+- `minecraft_usb_automation\Run-Reprovision-Existing.cmd`: fast no-reset path for existing Windows installs.
+- `minecraft_usb_automation\Run-Rebuild-Existing.cmd`: alias for the no-reset rebuild path.
+- `minecraft_usb_automation\Reprovision-Existing-Windows.ps1`: script behind the no-reset path.
 - `minecraft_usb_automation\Install-Minecraft189.ps1`: machine and per-user Minecraft setup.
 - `minecraft_usb_automation\payload\config.json`: reusable modpack/account configuration.
 - `minecraft_usb_automation\Run-Setup.cmd`: manual fallback after Windows first-run setup.

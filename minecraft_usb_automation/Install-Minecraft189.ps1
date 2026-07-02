@@ -321,6 +321,43 @@ function Invoke-LocalConfiguredInstaller {
     throw "Found $($installer.Name), but none of the configured silent install attempts worked for $Name."
 }
 
+function Get-InstalledProgramNames {
+    $paths = @(
+        'HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*',
+        'HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*',
+        'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*'
+    )
+
+    $names = @()
+    foreach ($path in $paths) {
+        $items = Get-ItemProperty -Path $path -ErrorAction SilentlyContinue
+        foreach ($item in $items) {
+            if (-not [string]::IsNullOrWhiteSpace([string]$item.DisplayName)) {
+                $names += [string]$item.DisplayName
+            }
+        }
+    }
+    return @($names | Select-Object -Unique)
+}
+
+function Test-AppDetected {
+    param([object]$App)
+
+    $patterns = @((Get-PropertyValue -Object $App -Name 'detectRegistryNamePatterns' -Default @()))
+    if ($patterns.Count -eq 0) { return $false }
+
+    $installedNames = Get-InstalledProgramNames
+    foreach ($pattern in $patterns) {
+        foreach ($name in $installedNames) {
+            if ($name -like [string]$pattern) {
+                Write-Host "Detected installed app: $name"
+                return $true
+            }
+        }
+    }
+    return $false
+}
+
 function Install-MinecraftLauncher {
     param(
         [string]$Root,
@@ -382,6 +419,11 @@ function Install-ExtraApps {
 
         $name = [string](Get-PropertyValue -Object $app -Name 'name' -Default 'Extra app')
         Write-Step "Installing $name"
+
+        if (Test-AppDetected -App $app) {
+            Write-Host "$name already appears to be installed. Skipping."
+            continue
+        }
 
         $installerFolder = [string](Get-PropertyValue -Object $app -Name 'installerFolder' -Default '')
         $installerDir = if ([string]::IsNullOrWhiteSpace($installerFolder)) {

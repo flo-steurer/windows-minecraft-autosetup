@@ -18,7 +18,81 @@
     "preferOfflineInstaller": true,
     "wingetId": "Mojang.MinecraftLauncher"
   },
+  "cleanup": {
+    "enabled": true,
+    "clearWindowsTemp": true,
+    "clearCurrentUserTemp": true,
+    "clearAllUserTemp": true,
+    "emptyRecycleBin": true,
+    "clearWindowsUpdateDownloadCache": true,
+    "clearDeliveryOptimizationCache": true,
+    "runComponentCleanup": false
+  },
+  "destructiveCleanup": {
+    "enabled": false,
+    "confirmation": "",
+    "deleteExistingPlayerProfile": true,
+    "deleteKnownUserDataFolders": false,
+    "knownUserDataFolders": [
+      "Desktop",
+      "Documents",
+      "Downloads",
+      "Pictures",
+      "Videos",
+      "Music"
+    ],
+    "excludeUsers": [
+      "Public",
+      "Default",
+      "Default User",
+      "All Users"
+    ]
+  },
+  "uninstall": {
+    "enabled": false,
+    "allowNonQuietUninstallStrings": false,
+    "displayNamePatterns": [
+      "*Minecraft Launcher*",
+      "*Roblox*",
+      "*Java 8*",
+      "*Java(TM) 8*"
+    ]
+  },
   "extraApps": [
+    {
+      "name": "Java 8 Runtime",
+      "enabled": true,
+      "preferOfflineInstaller": true,
+      "installerFolder": "payload\\installers\\java8",
+      "installerPatterns": [
+        "*java*8*.exe",
+        "*jre*8*.exe",
+        "*temurin*8*jre*.msi",
+        "*temurin*8*jre*.exe"
+      ],
+      "detectRegistryNamePatterns": [
+        "*Java 8*",
+        "*Java(TM) 8*",
+        "*Temurin*8*JRE*"
+      ],
+      "silentArgs": [
+        [
+          "/s"
+        ],
+        [
+          "/quiet",
+          "/norestart"
+        ],
+        [
+          "/silent",
+          "/norestart"
+        ],
+        [
+          "/S"
+        ]
+      ],
+      "wingetId": "EclipseAdoptium.Temurin.8.JRE"
+    },
     {
       "name": "Roblox Studio",
       "enabled": true,
@@ -27,6 +101,9 @@
       "installerPatterns": [
         "*RobloxStudio*.exe",
         "*Roblox*Studio*.exe"
+      ],
+      "detectRegistryNamePatterns": [
+        "*Roblox Studio*"
       ],
       "silentArgs": [
         [
