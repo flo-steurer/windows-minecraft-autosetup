@@ -1,67 +1,49 @@
 {
-  "setupVersion": "1",
-  "windows": {
-    "adminUserName": "SetupAdmin",
-    "playerUserName": "Player",
-    "targetUserSetupAccounts": [
-      "Player"
-    ]
-  },
-  "minecraft": {
-    "profileName": "Forge 1.8.9 Modpack",
-    "versionId": "1.8.9-forge1.8.9-11.15.1.2318-1.8.9",
-    "javaArgs": "-Xmx2G -Xms1G",
-    "copyAssets": true,
-    "requireAssets": false
-  },
-  "launcher": {
-    "preferOfflineInstaller": true,
-    "wingetId": "Mojang.MinecraftLauncher"
-  },
   "cleanup": {
-    "enabled": true,
     "clearWindowsTemp": true,
-    "clearCurrentUserTemp": true,
     "clearAllUserTemp": true,
     "emptyRecycleBin": true,
     "clearWindowsUpdateDownloadCache": true,
     "clearDeliveryOptimizationCache": true,
     "runComponentCleanup": false
   },
-  "destructiveCleanup": {
-    "enabled": false,
-    "confirmation": "",
-    "deleteExistingPlayerProfile": true,
-    "deleteKnownUserDataFolders": false,
-    "knownUserDataFolders": [
-      "Desktop",
-      "Documents",
-      "Downloads",
-      "Pictures",
-      "Videos",
-      "Music"
-    ],
-    "excludeUsers": [
-      "Public",
-      "Default",
-      "Default User",
-      "All Users"
-    ]
-  },
-  "uninstall": {
-    "enabled": false,
-    "allowNonQuietUninstallStrings": false,
-    "displayNamePatterns": [
-      "*Minecraft Launcher*",
-      "*Roblox*",
-      "*Java 8*",
-      "*Java(TM) 8*"
-    ]
-  },
-  "extraApps": [
-    {
+  "apps": {
+    "minecraftLauncher": {
+      "name": "Minecraft Launcher",
+      "requiresElevation": false,
+      "allowInteractiveInstaller": true,
+      "preferOfflineInstaller": true,
+      "installerFolder": "payload\\installers\\minecraft-launcher",
+      "installerPatterns": [
+        "*Minecraft*.msi",
+        "*Minecraft*.exe"
+      ],
+      "detectRegistryNamePatterns": [
+        "*Minecraft Launcher*"
+      ],
+      "detectStartAppPatterns": [
+        "*Minecraft Launcher*",
+        "Minecraft"
+      ],
+      "silentArgs": [
+        [
+          "/quiet",
+          "/norestart"
+        ],
+        [
+          "/silent",
+          "/norestart"
+        ],
+        [
+          "/S"
+        ]
+      ],
+      "wingetId": "Mojang.MinecraftLauncher"
+    },
+    "java8": {
       "name": "Java 8 Runtime",
-      "enabled": true,
+      "requiresElevation": true,
+      "detectJava8": true,
       "preferOfflineInstaller": true,
       "installerFolder": "payload\\installers\\java8",
       "installerPatterns": [
@@ -73,7 +55,8 @@
       "detectRegistryNamePatterns": [
         "*Java 8*",
         "*Java(TM) 8*",
-        "*Temurin*8*JRE*"
+        "*Temurin*8*JRE*",
+        "*Temurin*JRE*8*"
       ],
       "silentArgs": [
         [
@@ -93,9 +76,10 @@
       ],
       "wingetId": "EclipseAdoptium.Temurin.8.JRE"
     },
-    {
+    "robloxStudio": {
       "name": "Roblox Studio",
-      "enabled": true,
+      "requiresElevation": false,
+      "allowInteractiveInstaller": true,
       "preferOfflineInstaller": true,
       "installerFolder": "payload\\installers\\roblox-studio",
       "installerPatterns": [
@@ -105,46 +89,15 @@
       "detectRegistryNamePatterns": [
         "*Roblox Studio*"
       ],
+      "detectStartAppPatterns": [
+        "*Roblox Studio*"
+      ],
       "silentArgs": [
         [
           "-install"
-        ],
-        [
-          "/quiet",
-          "/norestart"
-        ],
-        [
-          "/silent",
-          "/norestart"
-        ],
-        [
-          "/S"
-        ],
-        []
+        ]
       ],
       "wingetId": "Roblox.RobloxStudio"
     }
-  ],
-  "mods": [
-    {
-      "file": "ComputerCraft1.79.jar",
-      "sha256": ""
-    },
-    {
-      "file": "ComputerCraftEdu1.79.jar",
-      "sha256": ""
-    },
-    {
-      "file": "forgeessentials-1.8.9-1.8.5.103-client.jar",
-      "sha256": ""
-    },
-    {
-      "file": "jei_1.8.9-2.28.18.187.jar",
-      "sha256": ""
-    },
-    {
-      "file": "OptiFine_1.8.9_HD_U_M5.jar",
-      "sha256": ""
-    }
-  ]
+  }
 }

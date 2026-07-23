@@ -1,141 +1,141 @@
-# Reset-to-Minecraft Laptop Setup
+# EDUTAIN Laptop Toolkit
 
-Reusable USB kit for resetting Windows laptops and preparing a local Minecraft Java/Forge modpack environment.
+A small USB-based toolkit for preparing existing Windows laptops without
+resetting or reinstalling Windows.
 
-The intended scale is small batch deployment: roughly tens of laptops.
+The toolkit provides four choices:
 
-## Recommended workflow
+1. Clean up disposable Windows files.
+2. Install a Minecraft pack for the current Windows user.
+3. Install Roblox Studio.
+4. Exit.
 
-1. Build one golden machine.
-   - Reset Windows.
-   - Install Minecraft Launcher.
-   - Install and launch the exact Forge version once.
-   - Add the mods and verify the profile starts.
+The included Minecraft pack definition is **ComputerCraft Edu Pack for
+Minecraft 1.8.9**. More packs and Minecraft versions can be added as
+self-contained folders.
 
-2. Copy golden-machine data into the USB payload.
-   - Copy `%APPDATA%\.minecraft\versions\<forge version id>` to `minecraft_usb_automation\payload\forge-template\versions\`.
-   - Copy `%APPDATA%\.minecraft\libraries` to `minecraft_usb_automation\payload\forge-template\libraries`.
-   - Copy `%APPDATA%\.minecraft\assets` to `minecraft_usb_automation\payload\forge-template\assets` if you want first launch to work with minimal downloads.
-   - Copy mod `.jar` files to `minecraft_usb_automation\payload\mods`.
-   - Put a tested offline Minecraft Launcher installer in `minecraft_usb_automation\payload\installers` when possible.
-   - Put a tested Roblox Studio installer in `minecraft_usb_automation\payload\installers\roblox-studio` when possible.
+## Important behavior
 
-3. Edit `minecraft_usb_automation\payload\config.json`.
-   - Change account names under `windows`.
-   - Change Forge/profile settings under `minecraft`.
-   - Change the `mods` list for a different modpack.
-   - Change or disable Roblox Studio under `extraApps`.
-   - Optionally fill each mod's `sha256`; generate it on Windows with `Get-FileHash <file> -Algorithm SHA256`.
-   - Increment `setupVersion` when you want already-provisioned user profiles to re-run setup.
+- Run the toolkit while signed in as the Windows account that will play
+  Minecraft.
+- Cleanup requests Administrator permission because it clears system caches.
+- Offline Java and Minecraft Launcher installers may also request Administrator
+  permission.
+- Minecraft files are still written to the original player's
+  `%APPDATA%\.minecraft` folder.
+- Installing a Minecraft pack permanently removes **everything** currently in
+  that player's `.minecraft\mods` folder, then copies only the selected pack's
+  mods.
+- The pack payload is validated before the existing mods are removed.
+- Cleanup does not delete documents and does not uninstall applications.
 
-4. Create USB-local secrets.
-   - Copy `minecraft_usb_automation\payload\local-secrets.example.psd1` to `minecraft_usb_automation\payload\local-secrets.psd1`.
-   - Fill in `AdminPassword`.
-   - Leave `PlayerPassword` blank only if you intentionally want the player account to have no password.
+## Prepare the USB payload
 
-5. Choose a deployment path.
-   - Fast path: keep Windows and run `minecraft_usb_automation\Run-Reprovision-Existing.cmd` as administrator.
-   - Cleanest path: reset each laptop with Settings > System > Recovery > Reset this PC > Remove everything.
+Copy the complete `minecraft_usb_automation` directory to the USB drive. Then
+fill these ignored payload directories.
 
-6. For the reset path, during OOBE, apply a provisioning package that runs:
+### ComputerCraft Edu Pack
 
-   ```powershell
-   powershell.exe -NoProfile -ExecutionPolicy Bypass -File "<path-to-usb>\OOBE-Apply.ps1"
-   ```
+Use the working golden machine as the source. Close Minecraft and Minecraft
+Launcher first.
 
-7. For the no-reset path, sign out and log in once as the configured player account.
-   - The per-user Minecraft setup runs via Windows Active Setup.
-   - Start Minecraft Launcher, sign in with a licensed account, and select the configured Forge profile.
+| Golden machine source | USB destination |
+| --- | --- |
+| `%APPDATA%\.minecraft\versions\1.8.9-forge1.8.9-11.15.1.2318-1.8.9` | `payload\minecraft-packs\computercraft-edu-1.8.9\versions\1.8.9-forge1.8.9-11.15.1.2318-1.8.9` |
+| `%APPDATA%\.minecraft\libraries` contents | `payload\minecraft-packs\computercraft-edu-1.8.9\libraries` |
+| `%APPDATA%\.minecraft\assets` contents | `payload\minecraft-packs\computercraft-edu-1.8.9\assets` |
+| The five tested mod `.jar` files | `payload\minecraft-packs\computercraft-edu-1.8.9\mods` |
 
-## Fast no-reset path
+The expected mod file names and Forge version ID are listed in
+`payload\minecraft-packs\computercraft-edu-1.8.9\pack.json`. Change that file if
+the golden machine uses different exact names.
 
-Use this when Windows Reset is too slow.
+Assets are optional, but bundling them reduces downloads on each laptop.
+Libraries and the configured version folder are required.
 
-The fastest reliable approach is not to deeply clean every old Windows install. Instead:
+### Offline installers
 
-1. Keep the existing Windows installation.
-2. Run conservative disk cleanup from an existing admin account.
-3. Create or update the configured local admin account.
-4. Create a fresh standard player account.
-5. Install Minecraft Launcher, Roblox Studio, Forge files, and mods.
-6. Only let children use the standard player account.
+Offline installers are preferred when present:
 
-For the cleanest result, set `windows.playerUserName` in `payload\config.json` to an account name that does not already exist on the laptop, for example `Player2026`. A new Windows account gets a fresh profile, so old browser files, old Minecraft config, old downloads, and old app data from previous users do not carry over into the child account.
+| Application | Destination |
+| --- | --- |
+| Minecraft Launcher | `payload\installers\minecraft-launcher` |
+| Java 8 runtime | `payload\installers\java8` |
+| Roblox Studio | `payload\installers\roblox-studio` |
 
-Run this on each laptop from an existing admin account:
+If no matching offline installer exists, the toolkit tries the configured
+WinGet package. Edit `payload\config.json` to change installer file patterns,
+silent arguments, detection patterns, or WinGet IDs.
+
+Test each offline installer on one laptop before using it across the full set.
+Installer command-line behavior can differ between vendor releases.
+
+## Run it
+
+1. Sign in as the Windows user who will play Minecraft.
+2. Insert the USB drive.
+3. Double-click `minecraft_usb_automation\Run-Toolkit.cmd`.
+4. Choose the required actions from the menu.
+5. For a Minecraft pack, type `INSTALL` when asked to confirm replacement of
+   the current mods folder.
+6. Open Minecraft Launcher, sign in, select `ComputerCraft Edu 1.8.9`, and
+   launch it once.
+
+Actions are independent. For example, Roblox Studio can be installed without
+running cleanup or installing Minecraft.
+
+Every run writes a timestamped transcript under
+`minecraft_usb_automation\logs`.
+
+## Add another Minecraft pack
+
+Copy the directory:
 
 ```text
-minecraft_usb_automation\Run-Reprovision-Existing.cmd
+payload\minecraft-packs\computercraft-edu-1.8.9
 ```
 
-Then sign out and log in as the configured player account.
+Give the copy a unique folder name, remove the copied binary payload, and edit
+its `pack.json`:
 
-The no-reset script cleans temp folders, recycle bin, Windows Update download cache, and Delivery Optimization cache. It does not delete documents, downloads, old user profiles, or installed apps. You can change cleanup behavior under `cleanup` in `payload\config.json`; keep `runComponentCleanup` disabled unless you can afford a slower DISM cleanup pass.
+- `id`: unique stable ID used by command-line automation
+- `name`: text shown in the menu
+- `profileKey`: unique key in `launcher_profiles.json`
+- `profileName`: name shown by Minecraft Launcher
+- `versionId`: exact directory name under the pack's `versions` folder
+- `javaArgs`: memory and JVM arguments
+- `mods`: exact mod file names and optional SHA256 hashes
+- `copyAssets` and `requireAssets`: asset-copy behavior
 
-### Aggressive no-reset mode
+Then add that pack's exact `versions`, `libraries`, `mods`, and optional
+`assets` payload. The toolkit discovers enabled `pack.json` files
+automatically; no PowerShell changes are needed.
 
-The script can also be configured to behave more like a rebuild, but it is intentionally opt-in.
+## Optional command-line use
 
-In `payload\config.json`:
+The menu is the normal entry point. These commands are useful for repeatable
+deployment:
 
-- `destructiveCleanup.enabled`: set to `true` only when you really want destructive cleanup.
-- `destructiveCleanup.confirmation`: must be exactly `DELETE_USER_DATA`.
-- `destructiveCleanup.deleteExistingPlayerProfile`: deletes the configured player profile so the next login recreates default Windows settings for that player.
-- `destructiveCleanup.deleteKnownUserDataFolders`: deletes configured folders such as Desktop, Documents, Downloads, Pictures, Videos, and Music from non-excluded profiles.
-- `uninstall.enabled`: removes only programs matching `uninstall.displayNamePatterns`; it does not blindly remove every non-Windows app.
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Laptop-Toolkit.ps1 -Action Cleanup -Force
 
-Do not try to uninstall "everything extra" generically. On mixed laptops, that can remove drivers, OEM utilities, school management tools, Office/licensing pieces, or GPU/Wi-Fi support. Use the explicit uninstall patterns for known unwanted apps.
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Laptop-Toolkit.ps1 -Action MinecraftPack -PackId computercraft-edu-1.8.9 -Force
 
-Java 8 is configured as an extra app. Put a tested Java 8 installer in `payload\installers\java8`, or verify the configured WinGet package id on one test laptop before relying on network installation.
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Laptop-Toolkit.ps1 -Action RobloxStudio -Force
+```
 
-## Reset path
+`-Force` skips the Minecraft mod-replacement confirmation. Use it only when
+that destructive behavior is intended.
 
-If you still want the cleanest OS state:
+## Public repository hygiene
 
-1. Reset each laptop.
-   - Settings > System > Recovery > Reset this PC > Remove everything.
-   - Local reinstall is usually enough if Windows itself is healthy.
+The `.gitignore` excludes:
 
-2. During OOBE, apply a provisioning package that runs:
+- installer binaries
+- mod `.jar` files
+- copied Minecraft assets, libraries, and version files
+- logs
 
-   ```powershell
-   powershell.exe -NoProfile -ExecutionPolicy Bypass -File "<path-to-usb>\OOBE-Apply.ps1"
-   ```
-
-3. Log in once as the player account.
-   - The per-user Minecraft setup runs via Windows Active Setup.
-   - Start Minecraft Launcher, sign in with a licensed account, and select the configured Forge profile.
-
-## Windows Home note
-
-Assume Windows Home is the baseline unless you have confirmed otherwise.
-
-Windows Configuration Designer's desktop provisioning wizard is documented for desktop editions except Home. For Home-heavy fleets, use the provisioning package mainly as a launcher for `OOBE-Apply.ps1`. That script creates the local admin and player accounts itself, using standard local Windows user commands, then runs the machine phase of the Minecraft setup.
-
-If a provisioning package will not run your script reliably on a specific Home build, fall back to completing OOBE manually once, then run `minecraft_usb_automation\Run-Setup.cmd` as administrator. That fallback still creates the Minecraft machine setup and per-user setup hook, but account creation may need to be done manually or by running `OOBE-Apply.ps1` from an elevated PowerShell session.
-
-## Public repo hygiene
-
-Do not commit:
-
-- `payload\local-secrets.psd1`
-- Minecraft Launcher installers
-- Roblox Studio installers
-- Mod `.jar` files
-- copied Forge libraries, versions, or assets
-- setup logs
-
-Those paths are ignored in `.gitignore`.
-
-## Main files
-
-- `minecraft_usb_automation\OOBE-Apply.ps1`: OOBE/provisioning entry point. Creates accounts and runs machine setup.
-- `minecraft_usb_automation\Run-Reprovision-Existing.cmd`: fast no-reset path for existing Windows installs.
-- `minecraft_usb_automation\Run-Rebuild-Existing.cmd`: alias for the no-reset rebuild path.
-- `minecraft_usb_automation\Reprovision-Existing-Windows.ps1`: script behind the no-reset path.
-- `minecraft_usb_automation\Run-Forge-ModpackOnly.cmd`: current-user Forge/mod copy only; does not install Launcher, Java, Roblox, or accounts.
-- `minecraft_usb_automation\Install-Forge-ModpackOnly.ps1`: script behind the Forge/mod-only path.
-- `minecraft_usb_automation\Install-Minecraft189.ps1`: machine and per-user Minecraft setup.
-- `minecraft_usb_automation\payload\config.json`: reusable modpack/account configuration.
-- `minecraft_usb_automation\Run-Setup.cmd`: manual fallback after Windows first-run setup.
-- `minecraft_usb_automation\Start-Reset-Helper.cmd`: optional pre-reset helper that records activation/recovery info and opens Reset this PC.
+Pack metadata, scripts, documentation, and placeholder files remain tracked.
+Do not commit licensed or third-party binaries unless their licenses explicitly
+allow redistribution.
