@@ -1,4 +1,4 @@
-# EDUTAIN Laptop Toolkit
+# Laptop Toolkit
 
 A small USB-based toolkit for preparing existing Windows laptops without
 resetting or reinstalling Windows.
